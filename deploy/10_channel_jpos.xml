@@ -1,0 +1,17 @@
+<channel-adaptor name="jpos-channel" class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
+    <channel logger="Q2" 
+             class="org.jpos.iso.channel.NACChannel" 
+             packager="org.jpos.iso.packager.GenericPackager">
+        <property name="packager-config" value="iso8583.xml"/>
+        <property name="host" value="localhost"/>
+        <property name="port" value="10000"/>
+        <property name="socketFactory" value="org.jpos.iso.GenericSSLSocketFactory"/>
+        <property name="keystore" value="myTrustStore.jts"/> 
+        <property name="clientauth" value="false"/> 
+        <property name="storepassword" value="changeit"/>
+        <property name="keypassword" value="changeit"/>
+    </channel>
+    <in>jpos-send</in>
+    <out>jpos-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>
