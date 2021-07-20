@@ -1,0 +1,27 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+   <class name = "domain.Bill" table = "racun">
+      
+      <meta attribute = "class-description">
+         This class contains details about Bill class. 
+      </meta>
+      
+      <id name = "billID" type = "int" column = "racunID">
+         <generator class="native"/>
+      </id>
+      
+      <property name = "amount" column = "iznos" type = "java.math.BigDecimal"/>
+      
+      <property name = "monthYear" column = "racunDat" type = "string"/>
+      
+      <property name = "type" column = "vrstaRacuna" type = "string"/>
+      
+      <many-to-one name = "client" class="domain.Client" not-null="true" column = "klijentId"></many-to-one>
+      
+      
+   </class>
+</hibernate-mapping>

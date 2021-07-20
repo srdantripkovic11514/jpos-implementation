@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+   <class name = "domain.Card" table = "kartica">
+      
+      <meta attribute = "class-description">
+         This class contains details about Card class. 
+      </meta>
+      
+      <id name = "cardNumber" type = "string" column = "brojKartice">
+         <generator class="native"/>
+      </id>
+      
+      <property name = "cardType" column = "tipKartice" type = "string"/>
+
+      <property name = "validThru" column = "vaziDo" type = "string"/>
+      
+      <many-to-one name = "client" class="domain.Client" not-null="true" column = "klijentId"></many-to-one>
+
+      <many-to-one name = "account" class="domain.Account" not-null="true" column = "brojTekucegRacuna"></many-to-one>
+      
+   </class>
+</hibernate-mapping>

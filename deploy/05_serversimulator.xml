@@ -1,0 +1,18 @@
+<server name="server"
+  class="org.jpos.q2.iso.QServer" logger="Q2">
+  <attr name="port" type="java.lang.Integer">10000</attr>
+  <server-socket-factory class="org.jpos.iso.GenericSSLSocketFactory" logger="Q2" >
+      <property name="keystore" value="myKeyStore.jks"/>
+      <property name="clientauth" value="false"/> 
+      <property name="storepassword" value="changeit"/>
+      <property name="keypassword" value="changeit"/>
+  </server-socket-factory>
+  <channel class="org.jpos.iso.channel.NACChannel" logger="Q2"
+  packager="org.jpos.iso.packager.GenericPackager">
+      <property name="packager-config" value="iso8583.xml"/>
+  </channel>
+  <request-listener class="org.jpos.bsh.BSHRequestListener" logger="Q2">
+    <property name="source" value="cfg/serversimulator.bsh" />
+    <!--<property name="source" value="src/main/java/org/jpos/jposmvn/Listener.java" />-->
+  </request-listener>
+</server>

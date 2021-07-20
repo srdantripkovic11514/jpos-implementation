@@ -1,0 +1,96 @@
+import org.jpos.ee.DB;
+import domain.Client;
+import domain.Account;
+import domain.Card;
+import domain.Transaction;
+import domain.Bill;
+import java.sql.Timestamp;
+import org.hibernate.cfg.Configuration;
+import java.util.List;
+import javax.persistence.Query;
+import java.math.BigDecimal;
+import forms.ServerForm;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+message.setResponseMTI ();
+Random random = new Random (System.currentTimeMillis());
+Configuration cfg = new Configuration().addResource("Client.hbm.xml");
+cfg.addResource("Account.hbm.xml");
+cfg.addResource("Card.hbm.xml");
+cfg.addResource("Bill.hbm.xml");
+cfg.addResource("Transaction.hbm.xml");
+DB db = new DB();
+db.open();
+db.beginTransaction();
+try{
+String cvv = message.getString(2).substring(4, 5) + message.getString(2).substring(9, 10) + message.getString(2).substring(14, 15);
+if(!cvv.equals(message.getString(60))){
+message.set(39, "02");
+throw new Exception("Pogresan cvv");
+}else{
+Query query = db.session().createQuery("From Card where brojKartice= :id and vaziDo= :vd");
+query.setParameter("id", message.getString(2));
+query.setParameter("vd", message.getString(17));
+List list = query.list();
+Query query1 = db.session().createQuery("From Account where vrstaKlijenta= :vk");
+query1.setParameter("vk", message.getString(42));
+List list1 = query1.list();
+Account a = new Account();
+Account b = new Account();
+Card c = (Card) list.iterator().next();
+if(!c.getClient().getName().toLowerCase().equals(message.getString(61).toLowerCase())){
+message.set(39, "03");
+throw new Exception("Navedeni klijent nije vlasnik kartice!");
+}
+if(!c.getClient().getStreetNumber().toLowerCase().equals(message.getString(62).toLowerCase())){
+message.set(39, "04");
+throw new Exception("Pogresna adresa");
+}
+a = DB.unwrap(c.getAccount());
+b = (Account) list1.iterator().next();
+if((a.getBalance().subtract(new BigDecimal(message.getString (4)))).compareTo(new BigDecimal("0"))==1 || 
+    (a.getBalance().subtract(new BigDecimal(message.getString (4)))).compareTo(new BigDecimal("0"))==0){
+    a.setBalance(a.getBalance().subtract(new BigDecimal(message.getString (4))));
+    b.setBalance(b.getBalance().add(new BigDecimal(message.getString (4))));
+    db.session().update(a);
+    db.session().update(b);
+    message.set(39, "00");
+}else{
+    message.set(39, "01");
+    throw new Exception("Nedovoljno sredstava");
+}
+int year = ZonedDateTime.now(ZoneId.of("Europe/Belgrade")).getYear();
+int month = Integer.valueOf(message.getString (7).substring(0, 2));
+int day = Integer.valueOf(message.getString (7).substring(2, 4));
+int hour = Integer.valueOf(message.getString (7).substring(4, 6));
+int minute = Integer.valueOf(message.getString (7).substring(6, 8));
+int second = Integer.valueOf(message.getString (7).substring(8, 10));
+Client cli = DB.unwrap(c.getClient());
+/*Query query2 = db.session().createQuery("From Bill where racunDat= :rd and klijentID= :kid and vrstaRacuna= :vr");
+query2.setParameter("rd", message.getString(12));
+query2.setParameter("kid", cli.getId());
+query2.setParameter("vr", message.getString(42));
+List list2 = query2.list();
+if(!list2.isEmpty()){
+message.set(39, "05");
+throw new Exception("Racun vec placen!");
+}*/
+Bill bil = new Bill(0, new BigDecimal(message.getString (4)), message.getString(12), message.getString(42), cli);
+Transaction t = new Transaction(0, new BigDecimal(message.getString (4)),ZonedDateTime.of(LocalDateTime.of(year, month, day, hour, minute, 1), ZoneId.of("Europe/Belgrade")) ,a, b);
+db.session().save(bil);
+db.session().save(t);
+db.commit();
+db.close();
+message.set (37, Integer.toString(Math.abs(random.nextInt()) % 1000000));
+message.set (38, Integer.toString(Math.abs(random.nextInt()) % 1000000));
+}
+}catch(Exception e){
+System.out.println(e);
+db.rollback();
+db.close(); 
+if(message.getValue(39).equals(null)){
+message.set(39, "10");
+}   
+}
+source.send (message);

@@ -1,0 +1,7 @@
+<mux class="org.jpos.q2.iso.QMUX" logger="Q2" name="mymux">
+   <!--<in>sslreceive</in>
+   <out>sslsend</out>-->
+   <in>jpos-receive</in>
+   <out>jpos-send</out>
+   <ready>jpos-channel.ready</ready>
+</mux>
